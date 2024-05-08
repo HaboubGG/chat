@@ -24,19 +24,19 @@ export class MsngrComponent {
        this.messages.push(message);
      });
      this.roomId = "663b6f6b39193f23be96f56c";
-     this.fetchOldMessages()
   }
  
   joinChat() {
      this.chatService.joinChat(this.username, this.recipient);
      this.getUserChatRooms();
   }
-  fetchOldMessages() {
+  fetchOldMessages(chatroomId:string) {
     
-    this.http.get<any[]>(`http://localhost:3000/api/chatrooms/663b6f6b39193f23be96f56c/messages`).subscribe(messages => {
+    this.http.get<any[]>(`http://localhost:3000/api/chatrooms/${chatroomId}/messages`).subscribe(messages => {
       this.messages = messages;
     });
   }
+
   getUserChatRooms() {
     return this.http.get<any[]>(`http://localhost:3000/api/chatrooms/${this.username}`).subscribe(chatRooms => {
       this.chatRooms = chatRooms;

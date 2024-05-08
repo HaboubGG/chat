@@ -15,8 +15,9 @@
     <div style="padding: 20; font-size: large;">
         ALL CHATROOMS 
     </div>
-    <div style="padding: 20; font-size: medium;color:aqua" *ngFor="let chatroom of chatRooms">
+    <div style="padding: 20; font-size: medium;color:aqua;cursor: pointer;" *ngFor="let chatroom of chatRooms" (click)="fetchOldMessages(chatroom._id)">
         {{chatroom}}
+        {{chatroom._id}}
         {{chatroom.name}}
     </div>
    </div>
