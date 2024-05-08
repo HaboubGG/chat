@@ -10,3 +10,13 @@
    <div *ngFor="let msg of messages">
     {{msg.sender}}: {{msg.message}}
    </div>
+
+   <div>
+    <div style="padding: 20; font-size: large;">
+        ALL CHATROOMS 
+    </div>
+    <div style="padding: 20; font-size: medium;color:aqua" *ngFor="let chatroom of chatRooms">
+        {{chatroom}}
+        {{chatroom.name}}
+    </div>
+   </div>

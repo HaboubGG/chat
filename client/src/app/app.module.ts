@@ -7,6 +7,7 @@ import { UsernnameComponent } from './components/usernname/usernname.component';
 import { FormsModule } from '@angular/forms';
 import { ChatComponent } from './containers/chat/chat.component';
 import { MsngrComponent } from './containers/msngr/msngr.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,7 @@ import { MsngrComponent } from './containers/msngr/msngr.component';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
