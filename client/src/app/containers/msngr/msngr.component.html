@@ -1,0 +1,12 @@
+<div>
+    <input [(ngModel)]="username" placeholder="Your username">
+    <input [(ngModel)]="recipient" placeholder="Recipient's username">
+    <button (click)="joinChat()">Join Chat</button>
+   </div>
+   <div>
+    <input [(ngModel)]="message" placeholder="Type your message">
+    <button (click)="sendMessage()">Send</button>
+   </div>
+   <div *ngFor="let msg of messages">
+    {{msg.sender}}: {{msg.message}}
+   </div>

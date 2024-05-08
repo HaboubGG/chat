@@ -1,54 +1,38 @@
 const express = require('express');
-const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const app = express();
-const http = require('http').createServer(app);
-
-const io = require('socket.io')(http, {
+const server = http.createServer(app);
+const io = socketIo(server, {
     cors: {
-        origin: '*'
+       origin: "http://localhost:4200", // Allow requests from your Angular app
+       methods: ["GET", "POST"], // Specify the methods allowed
+       credentials: true // Allow credentials
     }
-});
-
-app.get('/', (req, res) => {
-    res.send('Heello world');
-})
-
-let userList = new Map();
-
+   });
 io.on('connection', (socket) => {
-    let userName = socket.handshake.query.userName;
-    addUser(userName, socket.id);
+ console.log('a user connected');
 
-    socket.broadcast.emit('user-list', [...userList.keys()]);
-    socket.emit('user-list', [...userList.keys()]);
+ socket.on('join', ({ username, recipient }) => {
+    // Sort usernames alphabetically to ensure consistent room name
+    const sortedUsernames = [username, recipient].sort();
+    const room = `${sortedUsernames[0]}-${sortedUsernames[1]}`;
+    socket.join(room);
+    console.log(`${username} joined the chat with ${recipient}`);
+ });
 
-    socket.on('message', (msg) => {
-        socket.broadcast.emit('message-broadcast', {message: msg, userName: userName});
-    })
+ socket.on('message', ({ message, sender, recipient }) => {
+    // Use the same logic to ensure the room name is consistent
+    const sortedUsernames = [sender, recipient].sort();
+    const room = `${sortedUsernames[0]}-${sortedUsernames[1]}`;
+    io.to(room).emit('message', { message, sender });
+ });
 
-    socket.on('disconnect', (reason) => {
-        removeUser(userName, socket.id);
-    })
+ socket.on('disconnect', () => {
+    console.log('user disconnected');
+ });
 });
 
-function addUser(userName, id) {
-    if (!userList.has(userName)) {
-        userList.set(userName, new Set(id));
-    } else {
-        userList.get(userName).add(id);
-    }
-}
-
-function removeUser(userName, id) {
-    if (userList.has(userName)) {
-        let userIds = userList.get(userName);
-        if (userIds.size == 0) {
-            userList.delete(userName);
-        }
-    }
-}
-
-http.listen(process.env.PORT || 3000, () => {
-    console.log(`Server is running ${process.env.PORT || 3000}`);
-});
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
