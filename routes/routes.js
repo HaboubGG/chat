@@ -16,15 +16,21 @@ router.get('/chatrooms/:roomId/messages', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
+//returns all chatrooms for one user 
 router.get('/chatrooms/:username', async (req, res) => {
     try {
         const username = req.params.username;
-        const user = await User.findOne({ username }); // Find the user by username
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+        const chatRooms = await ChatRoom.find({
+            $or: [
+              { 'participants.user1': username },
+              { 'participants.user2': username }
+            ]
+          });
+            if(chatRooms){
+            console.log("chatrooms ahawma ",chatRooms)
+        }else{
+            console.log("no chatrooms for now ");
         }
-        const chatRooms = await ChatRoom.find({ participants: user._id });
         res.json(chatRooms);
     } catch (error) {
         console.error('Error fetching chat rooms:', error);

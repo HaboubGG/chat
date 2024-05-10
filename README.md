@@ -21,11 +21,3 @@ For chat we used nodejs + express as server and on the front-end we used Angular
 | ``` npm install socket.io-client ``` | To install `socket.io` for our client app |
 | ``` npm run build ``` | Need to run this command first time to build Angular project |
 | ``` npm run start ``` |  Start the Angular app |
-
-
-### Socials Links
-[YouTube] - [Twitch] - [Twitter]
-
-[YouTube]: <https://www.youtube.com/channel/UCZBwn0Sdl3mabNeDCIJmNlg>
-[Twitch]: <https://www.twitch.tv/competent_programming>
-[Twitter]: <https://twitter.com/competent_dev>

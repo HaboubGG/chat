@@ -6,8 +6,8 @@ const userSchema = new mongoose.Schema({
 });
 
 const messageSchema = new mongoose.Schema({
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    sender: String,
+    recipient: String,
     message: String,
     createdAt: { type: Date, default: Date.now },
 });
@@ -15,10 +15,10 @@ const messageSchema = new mongoose.Schema({
 const chatRoomSchema = new mongoose.Schema({
     name: String,
     participants: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User' // Reference to the User model
-    }],
-     messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }]
+        user1: String,
+        user2: String
+      }], 
+    messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }]
 });
 
 const User = mongoose.model('User', userSchema);

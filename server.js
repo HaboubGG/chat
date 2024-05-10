@@ -9,12 +9,11 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:4200", // Allow requests from your Angular app
-    methods: ["GET", "POST"], // Specify the methods allowed
-    credentials: true, // Allow credentials
+    origin: "http://localhost:4200", 
+    methods: ["GET", "POST"],
+    credentials: true,
   },
 });
-
 mongoose
   .connect("mongodb://localhost:27017/chatApp", {
     useNewUrlParser: true,
@@ -22,75 +21,62 @@ mongoose
   })
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
-
 io.on("connection", (socket) => {
   console.log("a user connected");
-
   socket.on("join", async ({ username, recipient }) => {
     try {
-      // Check if users exist in the database
-      let [user1, user2] = await Promise.all([
-        User.findOne({ username }),
-        User.findOne({ username: recipient }),
-      ]);
-
-      // If users don't exist, create them
-      if (!user1) {
-        user1 = await User.create({ username });
-      }
-      if (!user2) {
-        user2 = await User.create({ username: recipient });
-      }
 
       // Check if chat room exists, if not create one
       let chatRoom = await ChatRoom.findOne({
-        participants: { $all: [user1._id, user2._id] },
+        $or: [
+          { 'participants.user1': username, 'participants.user2': recipient },
+          { 'participants.user1': recipient, 'participants.user2': username }
+        ]
       }).populate("messages"); // Populate messages to get old messages
-
+      
       if (!chatRoom) {
         chatRoom = await ChatRoom.create({
-          name: `${user1.username}-${user2.username}`,
-          participants: [user1._id, user2._id],
+          name: `${username}-${recipient}`,
+          participants: [{ user1: username, user2: recipient }]
         });
       }
 
-      // Emit old messages to the user
-      socket.emit("oldMessages", chatRoom.messages);
+      // // Emit old messages to the user
+      // socket.emit("oldMessages", chatRoom.messages);
 
-      // Update users' chatRooms arrays with chat room ID
-      if (user1) {
-        user1.chatRooms.push(chatRoom._id);
-        await user1.save();
-      }
-      if (user2) {
-        user2.chatRooms.push(chatRoom._id);
-        await user2.save();
-      }
+      // // Update users' chatRooms arrays with chat room ID
+      // if (user1) {
+      //   user1.chatRooms.push(chatRoom._id);
+      //   await user1.save();
+      // }
+      // if (user2) {
+      //   user2.chatRooms.push(chatRoom._id);
+      //   await user2.save();
+      // }
 
       socket.join(chatRoom.name);
-      console.log(`${user1.username} joined the chat with ${user2.username}`);
+      console.log(`${username} joined the chat with ${recipient}`);
     } catch (error) {
       console.error("Error joining chat:", error);
       // Handle error appropriately, such as emitting an error event to the client
     }
   });
 
-  socket.on("message", async ({ message, sender, recipient }) => {
-    // Find sender and recipient in the database
-    const [senderUser, recipientUser] = await Promise.all([
-      User.findOne({ username: sender }),
-      User.findOne({ username: recipient }),
-    ]);
-
+  socket.on("message", async ({ sender, recipient, message, }) => {
+     console.log(sender , recipient);
     // Find the chat room
     const chatRoom = await ChatRoom.findOne({
-      participants: { $all: [senderUser._id, recipientUser._id] },
+      $or: [
+        { 'participants.user1': sender, 'participants.user2': recipient },
+        { 'participants.user1': recipient, 'participants.user2': sender }
+      ]
     });
+    console.log(sender,recipient);
 
     // Create message in the database
     const newMessage = await Message.create({
-      sender: senderUser._id,
-      recipient: recipientUser._id,
+      sender: sender,
+      recipient: recipient,
       message,
     });
 
@@ -99,9 +85,9 @@ io.on("connection", (socket) => {
     await chatRoom.save();
 
     // Update users' chatRooms arrays with chat room ID
-    senderUser.chatRooms.push(chatRoom._id);
-    recipientUser.chatRooms.push(chatRoom._id);
-    await Promise.all([senderUser.save(), recipientUser.save()]);
+    // senderUser.chatRooms.push(chatRoom._id);
+    // recipientUser.chatRooms.push(chatRoom._id);
+    // await Promise.all([senderUser.save(), recipientUser.save()]);
 
     io.to(chatRoom.name).emit("message", { message, sender });
   });
